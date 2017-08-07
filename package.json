@@ -1,0 +1,22 @@
+{
+  "name": "phaser-plugin-state-transition",
+  "version": "0.1.0",
+  "description": "State Transition Plugin for Phaser",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:lazyboywu/phaser-plugin-state-transition.git"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.71",
+    "browserify": "^14.4.0",
+    "gulp": "^3.9.1",
+    "phaser": "2.6.2",
+    "tsify": "^3.0.1",
+    "tslint": "^3.15.1",
+    "typescript": "2.2.x",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
+}
