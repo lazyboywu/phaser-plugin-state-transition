@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import View from '../view';
 import Base from './base';
 
-export default class Cover extends Base {
+export default class Uncover extends Base {
     static DIRECTION = {
         LEFT: 'LEFT',
         RIGHT: 'RIGHT',
@@ -21,16 +21,16 @@ export default class Cover extends Base {
 
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
-        this.direction = _.get(data, 'direction', Cover.DIRECTION.LEFT);
+        this.direction = _.get(data, 'direction', Uncover.DIRECTION.LEFT);
     }
 
     run() {
-        this.game.world.add(this.outView);
         this.game.world.add(this.inView);
+        this.game.world.add(this.outView);
 
-        var tween = this.game.add.tween(this.inView);
+        var tween = this.game.add.tween(this.outView);
         var position = this.calculatePosition();
-        tween.from(
+        tween.to(
             position,
             1000,
             Phaser.Easing.Linear.None,
@@ -43,30 +43,30 @@ export default class Cover extends Base {
 
     calculatePosition() {
         var position = {
-            x: this.inView.x,
-            y: this.inView.y,
+            x: this.outView.x,
+            y: this.outView.y,
         };
 
-        if (this.direction == Cover.DIRECTION.LEFT) {
-            position.x = this.game.width;
-        } else if (this.direction == Cover.DIRECTION.LEFT_BOTTOM) {
-            position.x = this.game.width;
-            position.y = -this.game.height;
-        } else if (this.direction == Cover.DIRECTION.BOTTOM) {
-            position.y = -this.game.height;
-        } else if (this.direction == Cover.DIRECTION.RIGHT_BOTTOM) {
+        if (this.direction == Uncover.DIRECTION.LEFT) {
             position.x = -this.game.width;
-            position.y = -this.game.height;
-        } else if (this.direction == Cover.DIRECTION.RIGHT) {
-            position.x = -this.game.width;
-        } else if (this.direction == Cover.DIRECTION.RIGHT_TOP) {
+        } else if (this.direction == Uncover.DIRECTION.LEFT_BOTTOM) {
             position.x = -this.game.width;
             position.y = this.game.height;
-        } else if (this.direction == Cover.DIRECTION.TOP) {
+        } else if (this.direction == Uncover.DIRECTION.BOTTOM) {
             position.y = this.game.height;
-        } else if (this.direction == Cover.DIRECTION.LEFT_TOP) {
+        } else if (this.direction == Uncover.DIRECTION.RIGHT_BOTTOM) {
             position.x = this.game.width;
             position.y = this.game.height;
+        } else if (this.direction == Uncover.DIRECTION.RIGHT) {
+            position.x = this.game.width;
+        } else if (this.direction == Uncover.DIRECTION.RIGHT_TOP) {
+            position.x = this.game.width;
+            position.y = -this.game.height;
+        } else if (this.direction == Uncover.DIRECTION.TOP) {
+            position.y = -this.game.height;
+        } else if (this.direction == Uncover.DIRECTION.LEFT_TOP) {
+            position.x = -this.game.width;
+            position.y = -this.game.height;
         }
 
         return position;
@@ -74,8 +74,8 @@ export default class Cover extends Base {
 
     complete() {
         this.game.tweens.remove(this.tween);
-        this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);
+        this.game.world.remove(this.outView);
         super.complete();
     }
 }

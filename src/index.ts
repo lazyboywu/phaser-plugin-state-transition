@@ -46,8 +46,6 @@ class Manager {
                     if (postTransit && typeof postTransit === 'function') {
                         postTransit.call(state);
                     }
-
-                    console.log('111')
                 });
 
                 transition.run();

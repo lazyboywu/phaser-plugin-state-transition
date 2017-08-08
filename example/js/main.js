@@ -13,6 +13,7 @@ var StateTransition = window.StateTransition;
 var outState = {
     preload: function () {
         game.load.image('out-view', 'assets/out-view.jpg');
+        game.load.image('in-view', 'assets/in-view.jpg');
     },
 
     create: function () {
@@ -23,7 +24,6 @@ var outState = {
 
 var inState = {
     preload: function () {
-        game.load.image('in-view', 'assets/in-view.jpg');
     },
 
     create: function () {
@@ -41,10 +41,16 @@ window.onload = function() {
         type: ''
     };
     var gui = new dat.GUI({
-        closeOnTop: false
+        closeOnTop: false,
+        width: 300,
     });
 
-    gui.add(config, 'type', {'选择': '', '无': 'none', '覆盖':'cover', '揭开': 'uncover'})
+    gui.add(config, 'type', {
+        '选择': '',
+        '无': 'none',
+        '覆盖':'cover',
+        '揭开': 'uncover'
+    })
     .onFinishChange(function(type) {
         createGUI(gui, type);
     });
@@ -68,8 +74,14 @@ function createGUI(gui, type) {
             'direction': '',
         }
         gui.add(config, 'direction', {
-            '左': StateTransition.Transition.Cover.DIRECTION.LEFT,
-            '右': StateTransition.Transition.Cover.DIRECTION.RIGHT,
+            '上(TOP)': StateTransition.Transition.Cover.DIRECTION.TOP,
+            '下(BOTTOM)': StateTransition.Transition.Cover.DIRECTION.BOTTOM,
+            '左(LEFT)': StateTransition.Transition.Cover.DIRECTION.LEFT,
+            '右(RIGHT)': StateTransition.Transition.Cover.DIRECTION.RIGHT,
+            '左上(LEFT_TOP)': StateTransition.Transition.Cover.DIRECTION.LEFT_TOP,
+            '左下(LEFT_BOTTOM)': StateTransition.Transition.Cover.DIRECTION.LEFT_BOTTOM,
+            '右上(RIGHT_TOP)': StateTransition.Transition.Cover.DIRECTION.RIGHT_TOP,
+            '右下(RIGHT_BOTTOM)': StateTransition.Transition.Cover.DIRECTION.RIGHT_BOTTOM,
         })
         .onFinishChange(function(direction) {
             changeStateByTransition({
@@ -80,16 +92,23 @@ function createGUI(gui, type) {
 
     } else if (type === 'uncover') {
         var config = {
-            'direction': 'LEFT',
+            'direction': '',
         }
         gui.add(config, 'direction', {
-            '左': StateTransition.Transition.Uncover.DIRECTION.LEFT,
-            '右': StateTransition.Transition.Uncover.DIRECTION.RIGHT,
+            '上(TOP)': StateTransition.Transition.Uncover.DIRECTION.TOP,
+            '下(BOTTOM)': StateTransition.Transition.Uncover.DIRECTION.BOTTOM,
+            '左(LEFT)': StateTransition.Transition.Uncover.DIRECTION.LEFT,
+            '右(RIGHT)': StateTransition.Transition.Uncover.DIRECTION.RIGHT,
+            '左上(LEFT_TOP)': StateTransition.Transition.Uncover.DIRECTION.LEFT_TOP,
+            '左下(LEFT_BOTTOM)': StateTransition.Transition.Uncover.DIRECTION.LEFT_BOTTOM,
+            '右上(RIGHT_TOP)': StateTransition.Transition.Uncover.DIRECTION.RIGHT_TOP,
+            '右下(RIGHT_BOTTOM)': StateTransition.Transition.Uncover.DIRECTION.RIGHT_BOTTOM,
         })
         .onFinishChange(function(direction) {
-            transitionFunc = 'uncover';
-            transitionParams = direction;
-            game.state.start('main');
+            changeStateByTransition({
+                type: 'uncover',
+                direction: direction,
+            });
         });
 
     }
