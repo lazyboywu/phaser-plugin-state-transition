@@ -17146,7 +17146,7 @@ var Manager = (function () {
 var StateTransition = window.StateTransition = { Manager: Manager, Transition: transition_1.default, View: view_1.default };
 exports.default = StateTransition;
 
-},{"./transition":7,"./view":9}],3:[function(require,module,exports){
+},{"./transition":9,"./view":15}],3:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17251,7 +17251,7 @@ var Clock = (function (_super) {
 }(base_1.default));
 exports.default = Clock;
 
-},{"../view":9,"./base":3}],5:[function(require,module,exports){
+},{"../view":15,"./base":3}],5:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17339,6 +17339,82 @@ Cover.DIRECTION = {
 exports.default = Cover;
 
 },{"./base":3,"lodash":1}],6:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var base_1 = require("./base");
+var Dissolve = (function (_super) {
+    __extends(Dissolve, _super);
+    function Dissolve(game, outView, inView) {
+        return _super.call(this, game, outView, inView) || this;
+    }
+    Dissolve.prototype.run = function () {
+        this.game.world.add(this.outView);
+        //this.game.world.add(this.inView);
+        var w = this.game.width / this.inView.scale.x;
+        var h = this.game.height / this.inView.scale.y;
+        var tileWidth = 50;
+        var tileHeight = 50;
+        var tiles = [];
+        var temp;
+        this.bmd = this.game.make.bitmapData(w, h);
+        this.copeImage = this.bmd.addToWorld(0, 0, 0, 0, this.inView.scale.x, this.inView.scale.y);
+        for (var y = 0; y < h; y += tileHeight) {
+            for (var x = 0; x < w; x += tileWidth) {
+                tiles.push([x, y]);
+            }
+        }
+        temp = tiles.slice(0);
+        var tempLen = temp.length;
+        Phaser.ArrayUtils.shuffle(temp);
+        var that = this;
+        var processStart = {
+            set tileIndex(tileIndex) {
+                tileIndex = Math.floor(tileIndex);
+                while (tempLen - tileIndex < temp.length) {
+                    var _a = temp.pop(), x = _a[0], y = _a[1];
+                    var tempRect = new Phaser.Rectangle(x, y, tileWidth, tileHeight);
+                    that.bmd.copyRect(that.inView, tempRect, x, y);
+                }
+            },
+            get tileIndex() {
+                return 0;
+            }
+        };
+        var processEnd = {
+            tileIndex: tempLen,
+        };
+        var tween = this.game.add.tween(processStart);
+        tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Dissolve.prototype.complete = function () {
+        if (this.copeImage) {
+            this.copeImage.destroy();
+        }
+        if (this.bmd) {
+            this.bmd.destroy();
+        }
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Dissolve;
+}(base_1.default));
+exports.default = Dissolve;
+
+},{"./base":3}],7:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17371,27 +17447,358 @@ var Factory = (function () {
 }());
 exports.default = Factory;
 
-},{"lodash":1}],7:[function(require,module,exports){
+},{"lodash":1}],8:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Fade = (function (_super) {
+    __extends(Fade, _super);
+    function Fade(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.tipe = _.get(data, 'tipe', Fade.TIPE.BLACK);
+        return _this;
+    }
+    Fade.prototype.run = function () {
+        //this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        if (this.tipe == Fade.TIPE.BLACK) {
+            var blackRectangle = this.game.add.graphics(0, 0);
+            blackRectangle.beginFill(0x000000);
+            blackRectangle.drawRect(0, 0, this.game.width, this.game.height);
+            this.game.world.add(blackRectangle);
+            this.game.world.add(this.outView);
+            var tweenOut = this.game.add.tween(this.outView);
+            tweenOut.to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, false);
+            var tweenIn = this.game.add.tween(blackRectangle);
+            tweenIn.to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, false);
+            tweenOut.chain(tweenIn);
+            tweenOut.start();
+            tweenIn.onComplete.addOnce(this.complete, this);
+            this.tweenIn = tweenIn;
+            this.tweenOut = tweenOut;
+            this.blackRectangle = blackRectangle;
+        }
+        else {
+            this.game.world.add(this.outView);
+            var tweenOut = this.game.add.tween(this.outView);
+            tweenOut.to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true);
+            tweenOut.onComplete.addOnce(this.complete, this);
+            this.tweenOut = tweenOut;
+        }
+    };
+    Fade.prototype.complete = function () {
+        if (this.tweenOut) {
+            this.game.tweens.remove(this.tweenOut);
+        }
+        if (this.tweenIn) {
+            this.game.tweens.remove(this.tweenIn);
+        }
+        if (this.blackRectangle) {
+            this.blackRectangle.destroy();
+        }
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Fade;
+}(base_1.default));
+Fade.TIPE = {
+    BLACK: 'BLACK',
+    SMOOTHLY: 'SMOOTHLY',
+};
+exports.default = Fade;
+
+},{"./base":3,"lodash":1}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
 var clock_1 = require("./clock");
 var cover_1 = require("./cover");
+var dissolve_1 = require("./dissolve");
+var fade_1 = require("./fade");
+var line_1 = require("./line");
+var push_1 = require("./push");
+var shape_1 = require("./shape");
 var uncover_1 = require("./uncover");
+var wipe_1 = require("./wipe");
 var factory_1 = require("./factory");
 var factory = new factory_1.default();
 factory.add('clock', clock_1.default);
 factory.add('cover', cover_1.default);
+factory.add('dissolve', dissolve_1.default);
+factory.add('fade', fade_1.default);
+factory.add('line', line_1.default);
+factory.add('push', push_1.default);
+factory.add('shape', shape_1.default);
 factory.add('uncover', uncover_1.default);
+factory.add('wipe', wipe_1.default);
 exports.default = {
     Base: base_1.default,
     factory: factory,
     Clock: clock_1.default,
     Cover: cover_1.default,
+    Dissolve: dissolve_1.default,
+    Fade: fade_1.default,
+    Line: line_1.default,
+    Push: push_1.default,
+    Shape: shape_1.default,
     Uncover: uncover_1.default,
+    Wipe: wipe_1.default,
 };
 
-},{"./base":3,"./clock":4,"./cover":5,"./factory":6,"./uncover":8}],8:[function(require,module,exports){
+},{"./base":3,"./clock":4,"./cover":5,"./dissolve":6,"./factory":7,"./fade":8,"./line":10,"./push":11,"./shape":12,"./uncover":13,"./wipe":14}],10:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var base_1 = require("./base");
+var Line = (function (_super) {
+    __extends(Line, _super);
+    function Line(game, outView, inView) {
+        return _super.call(this, game, outView, inView) || this;
+    }
+    Line.prototype.run = function () {
+        this.game.world.add(this.outView);
+        //this.game.world.add(this.inView);
+        var w = this.game.width;
+        var h = this.game.height;
+        var barWidth = 6;
+        var bars = [];
+        var temp = [];
+        this.bmd = this.game.make.bitmapData(w, h);
+        this.copeImage = this.bmd.addToWorld();
+        for (var x = 0; x < w; x += barWidth) {
+            bars.push(x);
+        }
+        temp = bars.slice(0);
+        Phaser.ArrayUtils.shuffle(temp);
+        var tempLen = temp.length;
+        Phaser.ArrayUtils.shuffle(temp);
+        var that = this;
+        var processStart = {
+            set barIndex(barIndex) {
+                barIndex = Math.floor(barIndex);
+                while (tempLen - barIndex < temp.length) {
+                    var xValue = temp.pop();
+                    var tempRect = new Phaser.Rectangle(xValue, 0, barWidth, h);
+                    that.bmd.copyRect(that.inView, tempRect, xValue, 0);
+                }
+            },
+            get barIndex() {
+                return 0;
+            }
+        };
+        var processEnd = {
+            barIndex: tempLen,
+        };
+        var tween = this.game.add.tween(processStart);
+        tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Line.prototype.complete = function () {
+        if (this.copeImage) {
+            this.copeImage.destroy();
+        }
+        if (this.bmd) {
+            this.bmd.destroy();
+        }
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Line;
+}(base_1.default));
+exports.default = Line;
+
+},{"./base":3}],11:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Push = (function (_super) {
+    __extends(Push, _super);
+    function Push(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Push.DIRECTION.LEFT);
+        return _this;
+    }
+    Push.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        var tweenIn = this.game.add.tween(this.inView);
+        var tweenOut = this.game.add.tween(this.outView);
+        var position = this.calculatePosition();
+        tweenOut.to(position.outPosition, 1000, Phaser.Easing.Linear.None, true);
+        tweenIn.from(position.inPosition, 1000, Phaser.Easing.Linear.None, true);
+        tweenIn.onComplete.addOnce(this.complete, this);
+        this.tweenIn = tweenIn;
+        this.tweenOut = tweenOut;
+    };
+    Push.prototype.calculatePosition = function () {
+        var inPosition = {
+            x: this.inView.x,
+            y: this.inView.y,
+        };
+        var outPosition = {
+            x: this.outView.x,
+            y: this.outView.y,
+        };
+        var position = {
+            inPosition: inPosition,
+            outPosition: outPosition
+        };
+        if (this.direction == Push.DIRECTION.LEFT) {
+            inPosition.x = this.game.width;
+            outPosition.x = -this.game.width;
+        }
+        else if (this.direction == Push.DIRECTION.LEFT_BOTTOM) {
+            inPosition.x = this.game.width;
+            outPosition.x = -this.game.width;
+            inPosition.y = -this.game.height;
+            outPosition.y = this.game.height;
+        }
+        else if (this.direction == Push.DIRECTION.BOTTOM) {
+            inPosition.y = -this.game.height;
+            outPosition.y = this.game.height;
+        }
+        else if (this.direction == Push.DIRECTION.RIGHT_BOTTOM) {
+            inPosition.x = -this.game.width;
+            outPosition.x = this.game.width;
+            inPosition.y = -this.game.height;
+            outPosition.y = this.game.height;
+        }
+        else if (this.direction == Push.DIRECTION.RIGHT) {
+            inPosition.x = -this.game.width;
+            outPosition.x = this.game.width;
+        }
+        else if (this.direction == Push.DIRECTION.RIGHT_TOP) {
+            inPosition.x = -this.game.width;
+            outPosition.x = this.game.width;
+            inPosition.y = this.game.height;
+            outPosition.y = -this.game.height;
+        }
+        else if (this.direction == Push.DIRECTION.TOP) {
+            inPosition.y = this.game.height;
+            outPosition.y = -this.game.height;
+        }
+        else if (this.direction == Push.DIRECTION.LEFT_TOP) {
+            inPosition.x = this.game.width;
+            outPosition.x = -this.game.width;
+            inPosition.y = this.game.height;
+            outPosition.y = -this.game.height;
+        }
+        return position;
+    };
+    Push.prototype.complete = function () {
+        this.game.tweens.remove(this.tweenIn);
+        this.game.tweens.remove(this.tweenOut);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Push;
+}(base_1.default));
+Push.DIRECTION = {
+    LEFT: 'LEFT',
+    RIGHT: 'RIGHT',
+    TOP: 'TOP',
+    BOTTOM: 'BOTTOM',
+    LEFT_TOP: 'LEFT_TOP',
+    RIGHT_TOP: 'RIGHT_TOP',
+    LEFT_BOTTOM: 'LEFT_BOTTOM',
+    RIGHT_BOTTOM: 'RIGHT_BOTTOM',
+};
+exports.default = Push;
+
+},{"./base":3,"lodash":1}],12:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Shape = (function (_super) {
+    __extends(Shape, _super);
+    function Shape(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.shape = _.get(data, 'shape', Shape.SHAPE.CIRCLE);
+        return _this;
+    }
+    Shape.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        var mask = this.game.add.graphics(this.game.width / 2, this.game.height / 2);
+        mask.beginFill(0xFFFFFF);
+        this.inView.mask = mask;
+        if (this.shape == Shape.SHAPE.CIRCLE) {
+            mask.drawCircle(0, 0, Math.sqrt(this.game.width * this.game.width + this.game.height * this.game.height));
+        }
+        else if (this.shape == Shape.SHAPE.DIAMOND) {
+            mask.drawPolygon({ x: -this.game.width * 2, y: 0 }, { x: 0, y: this.game.height * 2 }, { x: this.game.width * 2, y: 0 }, { x: 0, y: -this.game.height * 2 });
+        }
+        var tween = this.game.add.tween(this.inView.mask.scale);
+        tween.from({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Shape.prototype.complete = function () {
+        this.inView.mask.destroy();
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Shape;
+}(base_1.default));
+Shape.SHAPE = {
+    CIRCLE: 'CIRCLE',
+    DIAMOND: 'DIAMOND',
+};
+exports.default = Shape;
+
+},{"./base":3,"lodash":1}],13:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17478,7 +17885,114 @@ Uncover.DIRECTION = {
 };
 exports.default = Uncover;
 
-},{"./base":3,"lodash":1}],9:[function(require,module,exports){
+},{"./base":3,"lodash":1}],14:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Wipe = (function (_super) {
+    __extends(Wipe, _super);
+    function Wipe(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Wipe.DIRECTION.LEFT);
+        return _this;
+    }
+    Wipe.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        var tween = this.game.add.tween(this.outView);
+        var mask = this.createMask();
+        this.inView.mask = mask;
+        tween = this.game.add.tween(this.inView.mask.scale);
+        if (this.direction == Wipe.DIRECTION.TOP || this.direction == Wipe.DIRECTION.BOTTOM) {
+            tween.from({ y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Wipe.DIRECTION.LEFT || this.direction == Wipe.DIRECTION.RIGHT) {
+            tween.from({ x: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else {
+            tween.from({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Wipe.prototype.createMask = function () {
+        var mask;
+        if (this.direction == Wipe.DIRECTION.TOP) {
+            mask = this.game.add.graphics(0, this.game.height);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(0, -this.game.height, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.BOTTOM) {
+            mask = this.game.add.graphics(0, 0);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(0, 0, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.LEFT) {
+            mask = this.game.add.graphics(this.game.width, 0);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(-this.game.width, 0, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.RIGHT) {
+            mask = this.game.add.graphics(0, 0);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(0, 0, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.LEFT_TOP) {
+            mask = this.game.add.graphics(this.game.width, this.game.height);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(-this.game.width, -this.game.height, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.LEFT_BOTTOM) {
+            mask = this.game.add.graphics(this.game.width, 0);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(-this.game.width, 0, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.RIGHT_TOP) {
+            mask = this.game.add.graphics(0, this.game.height);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(0, -this.game.height, this.game.width, this.game.height);
+        }
+        else if (this.direction == Wipe.DIRECTION.RIGHT_BOTTOM) {
+            mask = this.game.add.graphics(0, 0);
+            mask.beginFill(0xFFFFFF);
+            mask.drawRect(0, 0, this.game.width, this.game.height);
+        }
+        return mask;
+    };
+    Wipe.prototype.complete = function () {
+        this.inView.mask.destroy();
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Wipe;
+}(base_1.default));
+Wipe.DIRECTION = {
+    LEFT: 'LEFT',
+    RIGHT: 'RIGHT',
+    TOP: 'TOP',
+    BOTTOM: 'BOTTOM',
+    LEFT_TOP: 'LEFT_TOP',
+    RIGHT_TOP: 'RIGHT_TOP',
+    LEFT_BOTTOM: 'LEFT_BOTTOM',
+    RIGHT_BOTTOM: 'RIGHT_BOTTOM',
+};
+exports.default = Wipe;
+
+},{"./base":3,"lodash":1}],15:[function(require,module,exports){
 /// <reference path='./definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
