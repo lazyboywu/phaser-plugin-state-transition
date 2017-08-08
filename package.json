@@ -2,6 +2,8 @@
   "name": "phaser-plugin-state-transition",
   "version": "0.1.0",
   "description": "State Transition Plugin for Phaser",
+  "license": "MIT",
+  "homepage": "https://github.com/lazyboywu/phaser-plugin-state-transition",
   "repository": {
     "type": "git",
     "url": "git@github.com:lazyboywu/phaser-plugin-state-transition.git"
@@ -17,6 +19,7 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "gulp-header": "^1.8.9",
     "lodash": "^4.17.4"
   }
 }
