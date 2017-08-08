@@ -51,6 +51,12 @@ window.onload = function() {
         '覆盖': 'cover',
         '揭开': 'uncover',
         '时钟': 'clock',
+        '溶解': 'dissolve',
+        '淡出': 'fade',
+        '线条': 'line',
+        '推进': 'push',
+        '形状': 'shape',
+        '擦除': 'wipe',
     })
     .onFinishChange(function(type) {
         createGUI(gui, type);
@@ -116,7 +122,85 @@ function createGUI(gui, type) {
         changeStateByTransition({
             type: 'clock',
         });
-    }
+    } else if (type === 'dissolve') {
+        changeStateByTransition({
+            type: 'dissolve',
+        });
+    } else if (type === 'fade') {
+        var config = {
+            'tipe': '',
+        }
+        gui.add(config, 'tipe', {
+            '平滑(SMOOTHLY)': StateTransition.Transition.Fade.TIPE.SMOOTHLY,
+            '全黑(BLACK)': StateTransition.Transition.Fade.TIPE.BLACK,
+        })
+        .onFinishChange(function(tipe) {
+            changeStateByTransition({
+                type: 'fade',
+                tipe: tipe,
+            });
+        });
+
+    } else if (type === 'line') {
+        changeStateByTransition({
+            type: 'line',
+        });
+    } else if (type === 'push') {
+        var config = {
+            'direction': '',
+        }
+        gui.add(config, 'direction', {
+            '上(TOP)': StateTransition.Transition.Cover.DIRECTION.TOP,
+            '下(BOTTOM)': StateTransition.Transition.Cover.DIRECTION.BOTTOM,
+            '左(LEFT)': StateTransition.Transition.Cover.DIRECTION.LEFT,
+            '右(RIGHT)': StateTransition.Transition.Cover.DIRECTION.RIGHT,
+            // '左上(LEFT_TOP)': StateTransition.Transition.Cover.DIRECTION.LEFT_TOP,
+            // '左下(LEFT_BOTTOM)': StateTransition.Transition.Cover.DIRECTION.LEFT_BOTTOM,
+            // '右上(RIGHT_TOP)': StateTransition.Transition.Cover.DIRECTION.RIGHT_TOP,
+            // '右下(RIGHT_BOTTOM)': StateTransition.Transition.Cover.DIRECTION.RIGHT_BOTTOM,
+        })
+        .onFinishChange(function(direction) {
+            changeStateByTransition({
+                type: 'push',
+                direction: direction,
+            });
+        });
+
+    } else if (type === 'shape') {
+        var config = {
+            'shape': '',
+        }
+        gui.add(config, 'shape', {
+            '圆形(CIRCLE)': StateTransition.Transition.Shape.SHAPE.CIRCLE,
+            '菱形(DIAMOND)': StateTransition.Transition.Shape.SHAPE.DIAMOND,
+        })
+        .onFinishChange(function(shape) {
+            changeStateByTransition({
+                type: 'shape',
+                shape: shape,
+            });
+        });
+    }  else if (type === 'wipe') {
+        var config = {
+            'direction': '',
+        }
+        gui.add(config, 'direction', {
+            '向上(TOP)': StateTransition.Transition.Wipe.DIRECTION.TOP,
+            '向下(BOTTOM)': StateTransition.Transition.Wipe.DIRECTION.BOTTOM,
+            '向左(LEFT)': StateTransition.Transition.Wipe.DIRECTION.LEFT,
+            '向右(RIGHT)': StateTransition.Transition.Wipe.DIRECTION.RIGHT,
+            '左上(LEFT_TOP)': StateTransition.Transition.Wipe.DIRECTION.LEFT_TOP,
+            '左下(LEFT_BOTTOM)': StateTransition.Transition.Wipe.DIRECTION.LEFT_BOTTOM,
+            '右上(RIGHT_TOP)': StateTransition.Transition.Wipe.DIRECTION.RIGHT_TOP,
+            '右下(RIGHT_BOTTOM)': StateTransition.Transition.Wipe.DIRECTION.RIGHT_BOTTOM,
+        })
+        .onFinishChange(function(direction) {
+            changeStateByTransition({
+                type: 'wipe',
+                direction: direction,
+            });
+        });
+    } 
 }
 
 function changeState() {
