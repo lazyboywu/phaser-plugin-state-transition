@@ -9,3 +9,5 @@ State Transition Plugin for Phaser
 ## Example
 
 ## 如何使用
+
+## 用法
