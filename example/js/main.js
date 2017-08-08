@@ -48,8 +48,9 @@ window.onload = function() {
     gui.add(config, 'type', {
         '选择': '',
         '无': 'none',
-        '覆盖':'cover',
-        '揭开': 'uncover'
+        '覆盖': 'cover',
+        '揭开': 'uncover',
+        '时钟': 'clock',
     })
     .onFinishChange(function(type) {
         createGUI(gui, type);
@@ -111,6 +112,10 @@ function createGUI(gui, type) {
             });
         });
 
+    } else if (type === 'clock') {
+        changeStateByTransition({
+            type: 'clock',
+        });
     }
 }
 
