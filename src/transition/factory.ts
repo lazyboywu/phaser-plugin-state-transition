@@ -1,7 +1,5 @@
 /// <reference path='../definitions.d.ts'/>
 
-import * as _ from 'lodash';
-
 import View from '../view';
 
 import Base from './base';
@@ -23,16 +21,17 @@ export default class Factory {
      * @param {Phaser.Game} game
      * @return {Base}
      */
-    create(game: Phaser.Game, outView: View, inView: View, data: object) {
+    create(game: Phaser.Game, outView: View, inView: View, data: {[key:string]:any}) {
         // 没有包含类型
-        if (!data || !_.has(data, 'type')) {
+        if (!data || !Object.prototype.hasOwnProperty.call(data, 'type')) {
+            console.error('Phaser Plugin Transition Factory: can not find type property ');
             return null;
         }
 
-        let type = _.get(data, 'type', '');
+        let type = data.type;
 
-        if (!_.has(this.creators, type)) {
-            console.log('Phaser Plugin Transition Factory: create ' + type + ' not found', type);
+        if (!Object.prototype.hasOwnProperty.call(this.creators, type)) {
+            console.error('Phaser Plugin Transition Factory: create ' + type + ' not found', type);
             return null;
         }
 

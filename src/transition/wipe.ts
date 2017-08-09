@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -21,7 +20,7 @@ export default class Wipe extends Base {
 
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
-        this.direction = _.get(data, 'direction', Wipe.DIRECTION.LEFT);
+        this.direction = this.get(data, 'direction', Wipe.DIRECTION.LEFT);
     }
 
     run() {
@@ -97,7 +96,7 @@ export default class Wipe extends Base {
             mask = this.game.add.graphics(0, 0);
             mask.beginFill(0xFFFFFF);
             mask.drawRect(0, 0, this.game.width, this.game.height);
-        } 
+        }
 
         return mask;
     }

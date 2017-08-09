@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -17,7 +16,7 @@ export default class Fade extends Base {
 
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
-        this.tipe = _.get(data, 'tipe', Fade.TIPE.BLACK);
+        this.tipe = this.get(data, 'tipe', Fade.TIPE.BLACK);
     }
 
     run() {
