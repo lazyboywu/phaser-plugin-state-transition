@@ -17612,8 +17612,13 @@ var Line = (function (_super) {
         };
         var tween = this.game.add.tween(processStart);
         tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
+        tween.onStart.addOnce(this.onStartHandle, this);
         tween.onComplete.addOnce(this.complete, this);
         this.tween = tween;
+    };
+    Line.prototype.onStartHandle = function () {
+        this.inView.mask = this.mask;
+        this.inView.visible = true;
     };
     Line.prototype.createLines = function () {
         var w = this.game.width / this.inView.scale.x;
@@ -17626,21 +17631,15 @@ var Line = (function (_super) {
         return lines;
     };
     Line.prototype.fillLine = function (tileIndex, lines, maxLength) {
-        if (maxLength === lines.length) {
-            this.inView.mask = this.mask;
-            this.inView.visible = true;
-        }
         tileIndex = Math.floor(tileIndex);
         while (maxLength - tileIndex < lines.length) {
             var x = lines.pop();
             this.mask.drawRect(x, 0, this.lineWidth, this.game.height);
         }
-        if (lines.length === 0) {
-            this.mask.destroy();
-            this.inView.mask = null;
-        }
     };
     Line.prototype.complete = function () {
+        this.mask.destroy();
+        this.inView.mask = null;
         this.game.tweens.remove(this.tween);
         this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);
