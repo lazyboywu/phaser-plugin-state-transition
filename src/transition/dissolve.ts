@@ -10,8 +10,6 @@ export default class Dissolve extends Base {
     tween: Phaser.Tween;
     mask: any;
 
-
-
     constructor(game: Phaser.Game, outView: View, inView: View) {
         super(game, outView, inView);
 
@@ -46,10 +44,16 @@ export default class Dissolve extends Base {
         }
 
         var tween = this.game.add.tween(processStart);
-        tween.to(processEnd, 1000,Phaser.Easing.Linear.None,true)
+        tween.onStart.addOnce(this.onStartHandle, this);
         tween.onComplete.addOnce(this.complete, this);
+        tween.to(processEnd, 1000,Phaser.Easing.Linear.None,true);
 
         this.tween = tween;
+    }
+
+    onStartHandle() {
+        this.inView.mask = this.mask;
+        this.inView.visible = true;
     }
 
     createTiles() {
@@ -72,22 +76,16 @@ export default class Dissolve extends Base {
     }
 
     fillTile(tileIndex: number, tiles: number[][], maxLength: number) {
-        if (maxLength === tiles.length) {
-            this.inView.mask = this.mask;
-            this.inView.visible = true;
-        }
         tileIndex = Math.floor(tileIndex)
         while (maxLength - tileIndex < tiles.length) {
             var [x, y] = tiles.pop();
             this.mask.drawRect(x, y, this.tileWidth, this.tileHeight);
         }
-        if (tiles.length === 0) {
-            this.mask.destroy();
-            this.inView.mask = null;
-        }
     }
 
     complete() {
+        this.mask.destroy();
+        this.inView.mask = null;
         this.game.tweens.remove(this.tween);
         this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);

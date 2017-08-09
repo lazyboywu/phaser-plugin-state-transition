@@ -17383,9 +17383,14 @@ var Dissolve = (function (_super) {
             tileIndex: maxLength,
         };
         var tween = this.game.add.tween(processStart);
-        tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
+        tween.onStart.addOnce(this.onStartHandle, this);
         tween.onComplete.addOnce(this.complete, this);
+        tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
         this.tween = tween;
+    };
+    Dissolve.prototype.onStartHandle = function () {
+        this.inView.mask = this.mask;
+        this.inView.visible = true;
     };
     Dissolve.prototype.createTiles = function () {
         var w = this.game.width / this.inView.scale.x;
@@ -17401,21 +17406,15 @@ var Dissolve = (function (_super) {
         return tiles;
     };
     Dissolve.prototype.fillTile = function (tileIndex, tiles, maxLength) {
-        if (maxLength === tiles.length) {
-            this.inView.mask = this.mask;
-            this.inView.visible = true;
-        }
         tileIndex = Math.floor(tileIndex);
         while (maxLength - tileIndex < tiles.length) {
             var _a = tiles.pop(), x = _a[0], y = _a[1];
             this.mask.drawRect(x, y, this.tileWidth, this.tileHeight);
         }
-        if (tiles.length === 0) {
-            this.mask.destroy();
-            this.inView.mask = null;
-        }
     };
     Dissolve.prototype.complete = function () {
+        this.mask.destroy();
+        this.inView.mask = null;
         this.game.tweens.remove(this.tween);
         this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);
