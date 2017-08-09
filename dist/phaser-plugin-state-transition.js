@@ -72,7 +72,7 @@ var Base = (function () {
     Base.prototype.get = function (data, key, def) {
         var result;
         if (data != null && Object.prototype.hasOwnProperty.call(data, key)) {
-            result = data.key;
+            result = data[key];
         }
         else {
             result = def;

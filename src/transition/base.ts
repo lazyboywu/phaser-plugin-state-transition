@@ -18,7 +18,7 @@ export default class Base {
     get<result>(data: {[key:string]: any}, key: string, def: result): result {
         let result: result;
         if (data != null && Object.prototype.hasOwnProperty.call(data, key)) {
-            result = data.key;
+            result = data[key];
         } else {
             result = def;
         }
