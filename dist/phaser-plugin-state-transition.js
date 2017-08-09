@@ -17586,54 +17586,62 @@ var base_1 = require("./base");
 var Line = (function (_super) {
     __extends(Line, _super);
     function Line(game, outView, inView) {
-        return _super.call(this, game, outView, inView) || this;
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.lineWidth = 6;
+        return _this;
     }
     Line.prototype.run = function () {
         this.game.world.add(this.outView);
-        //this.game.world.add(this.inView);
-        var w = this.game.width;
-        var h = this.game.height;
-        var barWidth = 6;
-        var bars = [];
-        var temp = [];
-        this.bmd = this.game.make.bitmapData(w, h);
-        this.copeImage = this.bmd.addToWorld();
-        for (var x = 0; x < w; x += barWidth) {
-            bars.push(x);
-        }
-        temp = bars.slice(0);
-        Phaser.ArrayUtils.shuffle(temp);
-        var tempLen = temp.length;
-        Phaser.ArrayUtils.shuffle(temp);
+        this.game.world.add(this.inView);
+        this.inView.visible = false;
+        var mask = this.game.make.graphics(0, 0);
+        mask.beginFill(0xFFFFFF);
+        this.mask = mask;
+        var lines = this.createLines();
+        var maxLength = lines.length;
         var that = this;
         var processStart = {
-            set barIndex(barIndex) {
-                barIndex = Math.floor(barIndex);
-                while (tempLen - barIndex < temp.length) {
-                    var xValue = temp.pop();
-                    var tempRect = new Phaser.Rectangle(xValue, 0, barWidth, h);
-                    that.bmd.copyRect(that.inView, tempRect, xValue, 0);
-                }
+            set tileIndex(tileIndex) {
+                that.fillLine(tileIndex, lines, maxLength);
             },
-            get barIndex() {
+            get tileIndex() {
                 return 0;
             }
         };
         var processEnd = {
-            barIndex: tempLen,
+            tileIndex: maxLength,
         };
         var tween = this.game.add.tween(processStart);
         tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
         tween.onComplete.addOnce(this.complete, this);
         this.tween = tween;
     };
+    Line.prototype.createLines = function () {
+        var w = this.game.width / this.inView.scale.x;
+        var lines = [];
+        for (var x = 0; x < w; x += this.lineWidth) {
+            lines.push(x);
+        }
+        lines = lines.slice(0);
+        Phaser.ArrayUtils.shuffle(lines);
+        return lines;
+    };
+    Line.prototype.fillLine = function (tileIndex, lines, maxLength) {
+        if (maxLength === lines.length) {
+            this.inView.mask = this.mask;
+            this.inView.visible = true;
+        }
+        tileIndex = Math.floor(tileIndex);
+        while (maxLength - tileIndex < lines.length) {
+            var x = lines.pop();
+            this.mask.drawRect(x, 0, this.lineWidth, this.game.height);
+        }
+        if (lines.length === 0) {
+            this.mask.destroy();
+            this.inView.mask = null;
+        }
+    };
     Line.prototype.complete = function () {
-        if (this.copeImage) {
-            this.copeImage.destroy();
-        }
-        if (this.bmd) {
-            this.bmd.destroy();
-        }
         this.game.tweens.remove(this.tween);
         this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);
