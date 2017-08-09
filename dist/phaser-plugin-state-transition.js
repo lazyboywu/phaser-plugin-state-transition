@@ -17355,56 +17355,67 @@ var base_1 = require("./base");
 var Dissolve = (function (_super) {
     __extends(Dissolve, _super);
     function Dissolve(game, outView, inView) {
-        return _super.call(this, game, outView, inView) || this;
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.tileWidth = 50;
+        _this.tileHeight = 50;
+        return _this;
     }
     Dissolve.prototype.run = function () {
         this.game.world.add(this.outView);
-        //this.game.world.add(this.inView);
-        var w = this.game.width / this.inView.scale.x;
-        var h = this.game.height / this.inView.scale.y;
-        var tileWidth = 50;
-        var tileHeight = 50;
-        var tiles = [];
-        var temp;
-        this.bmd = this.game.make.bitmapData(w, h);
-        this.copeImage = this.bmd.addToWorld(0, 0, 0, 0, this.inView.scale.x, this.inView.scale.y);
-        for (var y = 0; y < h; y += tileHeight) {
-            for (var x = 0; x < w; x += tileWidth) {
-                tiles.push([x, y]);
-            }
-        }
-        temp = tiles.slice(0);
-        var tempLen = temp.length;
-        Phaser.ArrayUtils.shuffle(temp);
+        this.game.world.add(this.inView);
+        this.inView.visible = false;
+        var mask = this.game.make.graphics(0, 0);
+        mask.beginFill(0xFFFFFF);
+        this.mask = mask;
+        // this.inView.mask = mask;
+        var tiles = this.createTiles();
+        var maxLength = tiles.length;
         var that = this;
         var processStart = {
             set tileIndex(tileIndex) {
-                tileIndex = Math.floor(tileIndex);
-                while (tempLen - tileIndex < temp.length) {
-                    var _a = temp.pop(), x = _a[0], y = _a[1];
-                    var tempRect = new Phaser.Rectangle(x, y, tileWidth, tileHeight);
-                    that.bmd.copyRect(that.inView, tempRect, x, y);
-                }
+                that.fillTile(tileIndex, tiles, maxLength);
             },
             get tileIndex() {
                 return 0;
             }
         };
         var processEnd = {
-            tileIndex: tempLen,
+            tileIndex: maxLength,
         };
         var tween = this.game.add.tween(processStart);
         tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
         tween.onComplete.addOnce(this.complete, this);
         this.tween = tween;
     };
+    Dissolve.prototype.createTiles = function () {
+        var w = this.game.width / this.inView.scale.x;
+        var h = this.game.height / this.inView.scale.y;
+        var tiles = [];
+        for (var y = 0; y < h; y += this.tileHeight) {
+            for (var x = 0; x < w; x += this.tileWidth) {
+                tiles.push([x, y]);
+            }
+        }
+        tiles = tiles.slice(0);
+        Phaser.ArrayUtils.shuffle(tiles);
+        return tiles;
+    };
+    Dissolve.prototype.fillTile = function (tileIndex, tiles, maxLength) {
+        if (maxLength === tiles.length) {
+            this.inView.mask = this.mask;
+            this.inView.visible = true;
+        }
+        tileIndex = Math.floor(tileIndex);
+        while (maxLength - tileIndex < tiles.length) {
+            var _a = tiles.pop(), x = _a[0], y = _a[1];
+            this.mask.drawRect(x, y, this.tileWidth, this.tileHeight);
+        }
+        if (tiles.length === 0) {
+            this.mask.destroy();
+            this.inView.mask = null;
+        }
+    };
     Dissolve.prototype.complete = function () {
-        if (this.copeImage) {
-            this.copeImage.destroy();
-        }
-        if (this.bmd) {
-            this.bmd.destroy();
-        }
         this.game.tweens.remove(this.tween);
         this.game.world.remove(this.outView);
         this.game.world.remove(this.inView);

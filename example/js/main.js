@@ -36,6 +36,7 @@ game.state.add('out', outState);
 game.state.add('in', inState);
 
 window.onload = function() {
+    game.load.crossOrigin = 'anonymous';
     game.plugins.add(StateTransition.Manager);
     var config = {
         type: ''
@@ -48,15 +49,15 @@ window.onload = function() {
     gui.add(config, 'type', {
         '选择': '',
         '无': 'none',
-        '覆盖': 'cover',
-        '揭开': 'uncover',
-        '时钟': 'clock',
-        '溶解': 'dissolve',
-        '淡出': 'fade',
-        '线条': 'line',
-        '推进': 'push',
-        '形状': 'shape',
-        '擦除': 'wipe',
+        '覆盖(cover)': 'cover',
+        '揭开(uncover)': 'uncover',
+        '时钟(clock)': 'clock',
+        '溶解(dissolve)': 'dissolve',
+        '淡出(fade)': 'fade',
+        '线条(line)': 'line',
+        '推进(push)': 'push',
+        '形状(shape)': 'shape',
+        '擦除(wipe)': 'wipe',
     })
     .onFinishChange(function(type) {
         createGUI(gui, type);
@@ -200,7 +201,7 @@ function createGUI(gui, type) {
                 direction: direction,
             });
         });
-    } 
+    }
 }
 
 function changeState() {
