@@ -10,7 +10,9 @@ State Transition Plugin for Phaser
 [phaser-state-transition-plugin](https://github.com/aaccurso/phaser-state-transition-plugin)
 
 ## Example
-[演示](https://codepen.io/lazyboywu/full/brqLbj)
+[演示 codepen](https://codepen.io/lazyboywu/full/brqLbj)
+
+[演示 runjs](http://runjs.cn/detail/ct2n4zft)
 
 ## 如何使用
 

@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -21,7 +20,7 @@ export default class Uncover extends Base {
 
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
-        this.direction = _.get(data, 'direction', Uncover.DIRECTION.LEFT);
+        this.direction = this.get(data, 'direction', Uncover.DIRECTION.LEFT);
     }
 
     run() {

@@ -9,17 +9,17 @@
     "url": "git@github.com:lazyboywu/phaser-plugin-state-transition.git"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.71",
     "browserify": "^14.4.0",
     "gulp": "^3.9.1",
     "gulp-header": "^1.8.9",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^3.0.0",
     "phaser": "2.6.2",
     "tsify": "^3.0.1",
     "tslint": "^3.15.1",
     "typescript": "2.2.x",
+    "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
-  "dependencies": {
-    "lodash": "^4.17.4"
-  }
+  "dependencies": {}
 }

@@ -17157,6 +17157,16 @@ var Base = (function () {
         this.outView = outView;
         this.inView = inView;
     }
+    Base.prototype.get = function (data, key, def) {
+        var result;
+        if (data != null && Object.prototype.hasOwnProperty.call(data, key)) {
+            result = data[key];
+        }
+        else {
+            result = def;
+        }
+        return result;
+    };
     Base.prototype.run = function () {
         // nothing
     };
@@ -17514,6 +17524,7 @@ var Clock = (function (_super) {
 exports.default = Clock;
 
 },{"../view":19,"./base":3}],8:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17526,14 +17537,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Cover = (function (_super) {
     __extends(Cover, _super);
     function Cover(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.direction = _.get(data, 'direction', Cover.DIRECTION.LEFT);
+        _this.direction = _this.get(data, 'direction', Cover.DIRECTION.LEFT);
         return _this;
     }
     Cover.prototype.run = function () {
@@ -17600,7 +17609,8 @@ Cover.DIRECTION = {
 };
 exports.default = Cover;
 
-},{"./base":3,"lodash":1}],9:[function(require,module,exports){
+},{"./base":3}],9:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17690,7 +17700,6 @@ exports.default = Dissolve;
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var _ = require("lodash");
 var Factory = (function () {
     function Factory() {
         this.creators = {};
@@ -17705,12 +17714,13 @@ var Factory = (function () {
      */
     Factory.prototype.create = function (game, outView, inView, data) {
         // 没有包含类型
-        if (!data || !_.has(data, 'type')) {
+        if (!data || !Object.prototype.hasOwnProperty.call(data, 'type')) {
+            console.error('Phaser Plugin Transition Factory: can not find type property ');
             return null;
         }
-        var type = _.get(data, 'type', '');
-        if (!_.has(this.creators, type)) {
-            console.log('Phaser Plugin Transition Factory: create ' + type + ' not found', type);
+        var type = data.type;
+        if (!Object.prototype.hasOwnProperty.call(this.creators, type)) {
+            console.error('Phaser Plugin Transition Factory: create ' + type + ' not found', type);
             return null;
         }
         return new this.creators[type](game, outView, inView, data);
@@ -17719,7 +17729,8 @@ var Factory = (function () {
 }());
 exports.default = Factory;
 
-},{"lodash":1}],11:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17732,14 +17743,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Fade = (function (_super) {
     __extends(Fade, _super);
     function Fade(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.tipe = _.get(data, 'tipe', Fade.TIPE.BLACK);
+        _this.tipe = _this.get(data, 'tipe', Fade.TIPE.BLACK);
         return _this;
     }
     Fade.prototype.run = function () {
@@ -17792,7 +17801,7 @@ Fade.TIPE = {
 };
 exports.default = Fade;
 
-},{"./base":3,"lodash":1}],12:[function(require,module,exports){
+},{"./base":3}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
@@ -17843,6 +17852,7 @@ exports.default = {
 };
 
 },{"./base":3,"./box":4,"./bulletin":5,"./chessboard":6,"./clock":7,"./cover":8,"./dissolve":9,"./factory":10,"./fade":11,"./line":13,"./push":14,"./shape":15,"./shutter":16,"./uncover":17,"./wipe":18}],13:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17924,6 +17934,7 @@ var Line = (function (_super) {
 exports.default = Line;
 
 },{"./base":3}],14:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17936,14 +17947,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Push = (function (_super) {
     __extends(Push, _super);
     function Push(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.direction = _.get(data, 'direction', Push.DIRECTION.LEFT);
+        _this.direction = _this.get(data, 'direction', Push.DIRECTION.LEFT);
         return _this;
     }
     Push.prototype.run = function () {
@@ -18034,7 +18043,8 @@ Push.DIRECTION = {
 };
 exports.default = Push;
 
-},{"./base":3,"lodash":1}],15:[function(require,module,exports){
+},{"./base":3}],15:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18047,14 +18057,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Shape = (function (_super) {
     __extends(Shape, _super);
     function Shape(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.shape = _.get(data, 'shape', Shape.SHAPE.CIRCLE);
+        _this.shape = _this.get(data, 'shape', Shape.SHAPE.CIRCLE);
         return _this;
     }
     Shape.prototype.run = function () {
@@ -18089,7 +18097,7 @@ Shape.SHAPE = {
 };
 exports.default = Shape;
 
-},{"./base":3,"lodash":1}],16:[function(require,module,exports){
+},{"./base":3}],16:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18187,6 +18195,7 @@ Shutter.DIRECTION = {
 exports.default = Shutter;
 
 },{"./base":3,"lodash":1}],17:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18199,14 +18208,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Uncover = (function (_super) {
     __extends(Uncover, _super);
     function Uncover(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.direction = _.get(data, 'direction', Uncover.DIRECTION.LEFT);
+        _this.direction = _this.get(data, 'direction', Uncover.DIRECTION.LEFT);
         return _this;
     }
     Uncover.prototype.run = function () {
@@ -18273,7 +18280,8 @@ Uncover.DIRECTION = {
 };
 exports.default = Uncover;
 
-},{"./base":3,"lodash":1}],18:[function(require,module,exports){
+},{"./base":3}],18:[function(require,module,exports){
+/// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18286,14 +18294,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-/// <reference path='../definitions.d.ts'/>
-var _ = require("lodash");
 var base_1 = require("./base");
 var Wipe = (function (_super) {
     __extends(Wipe, _super);
     function Wipe(game, outView, inView, data) {
         var _this = _super.call(this, game, outView, inView) || this;
-        _this.direction = _.get(data, 'direction', Wipe.DIRECTION.LEFT);
+        _this.direction = _this.get(data, 'direction', Wipe.DIRECTION.LEFT);
         return _this;
     }
     Wipe.prototype.run = function () {
@@ -18380,7 +18386,7 @@ Wipe.DIRECTION = {
 };
 exports.default = Wipe;
 
-},{"./base":3,"lodash":1}],19:[function(require,module,exports){
+},{"./base":3}],19:[function(require,module,exports){
 /// <reference path='./definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {

@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';

@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -15,7 +14,7 @@ export default class Shape extends Base {
 
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
-        this.shape = _.get(data, 'shape', Shape.SHAPE.CIRCLE);
+        this.shape = this.get(data, 'shape', Shape.SHAPE.CIRCLE);
     }
 
     run() {
