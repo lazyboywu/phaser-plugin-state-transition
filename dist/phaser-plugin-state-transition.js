@@ -17146,7 +17146,7 @@ var Manager = (function () {
 var StateTransition = window.StateTransition = { Manager: Manager, Transition: transition_1.default, View: view_1.default };
 exports.default = StateTransition;
 
-},{"./transition":9,"./view":15}],3:[function(require,module,exports){
+},{"./transition":12,"./view":19}],3:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17175,6 +17175,268 @@ var Base = (function () {
 exports.default = Base;
 
 },{}],4:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Box = (function (_super) {
+    __extends(Box, _super);
+    function Box(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Box.DIRECTION.SPREAD);
+        return _this;
+    }
+    Box.prototype.run = function () {
+        var mask = this.game.add.graphics(0, 0);
+        mask.anchor.setTo(0.5, 0.5);
+        mask.x = this.game.width / 2;
+        mask.y = this.game.height / 2;
+        mask.beginFill(0xFFFFFF);
+        mask.drawRect(-mask.x, -mask.y, this.game.width, this.game.height);
+        var tween;
+        if (this.direction == Box.DIRECTION.SPREAD) {
+            this.game.world.add(this.outView);
+            this.game.world.add(this.inView);
+            this.inView.mask = mask;
+            tween = this.game.add.tween(this.inView.mask.scale);
+            tween.from({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Box.DIRECTION.SHRINK) {
+            this.game.world.add(this.inView);
+            this.game.world.add(this.outView);
+            this.outView.mask = mask;
+            tween = this.game.add.tween(this.outView.mask.scale);
+            tween.to({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Box.prototype.complete = function () {
+        if (this.inView.mask) {
+            this.inView.mask.destroy();
+        }
+        else if (this.outView.mask) {
+            this.outView.mask.destroy();
+        }
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Box;
+}(base_1.default));
+Box.DIRECTION = {
+    SPREAD: 'SPREAD',
+    SHRINK: 'SHRINK',
+};
+exports.default = Box;
+
+},{"./base":3,"lodash":1}],5:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var base_1 = require("./base");
+var Bulletin = (function (_super) {
+    __extends(Bulletin, _super);
+    function Bulletin(game, outView, inView, data) {
+        return _super.call(this, game, outView, inView) || this;
+    }
+    Bulletin.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        this.inView.anchor.setTo(0.5, 0.5);
+        this.inView.top = 0;
+        this.inView.left = 0;
+        var tweenRotate = this.game.add.tween(this.inView);
+        tweenRotate.from({ angle: 180 }, 1000, Phaser.Easing.Linear.None, true);
+        var tweenScale = this.game.add.tween(this.inView.scale);
+        tweenScale.from({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        tweenRotate.onComplete.addOnce(this.complete, this);
+        this.tweenRotate = tweenRotate;
+        this.tweenScale = tweenScale;
+    };
+    Bulletin.prototype.complete = function () {
+        this.game.tweens.remove(this.tweenRotate);
+        this.game.tweens.remove(this.tweenScale);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Bulletin;
+}(base_1.default));
+exports.default = Bulletin;
+
+},{"./base":3}],6:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Chessboard = (function (_super) {
+    __extends(Chessboard, _super);
+    function Chessboard(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Chessboard.DIRECTION.HORIZONTAL);
+        _this.tileWidth = 160;
+        _this.tileHeight = 80;
+        return _this;
+    }
+    Chessboard.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        this.inView.visible = false;
+        this.mask = this.game.make.graphics(0, 0);
+        this.mask.beginFill(0xFFFFFF);
+        var tiles = this.createTiles();
+        var that = this;
+        var processStart;
+        var processEnd;
+        if (this.direction === Chessboard.DIRECTION.VERTICAL) {
+            processStart = {
+                set tileWidth(tileWidth) {
+                    that.fillVerticalTile(tileWidth, tiles);
+                },
+                get tileWidth() {
+                    return 0;
+                }
+            };
+            processEnd = {
+                tileWidth: this.tileWidth,
+            };
+        }
+        else if (this.direction === Chessboard.DIRECTION.HORIZONTAL) {
+            processStart = {
+                set tileWidth(tileWidth) {
+                    that.fillHorizontalTile(tileWidth, tiles);
+                },
+                get tileWidth() {
+                    return 0;
+                }
+            };
+            processEnd = {
+                tileWidth: this.tileWidth,
+            };
+        }
+        var tween = this.game.add.tween(processStart);
+        tween.to(processEnd, 2000, Phaser.Easing.Linear.None, true);
+        tween.onStart.addOnce(this.onStartHandle, this);
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Chessboard.prototype.onStartHandle = function () {
+        this.inView.mask = this.mask;
+        this.inView.visible = true;
+    };
+    Chessboard.prototype.createTiles = function () {
+        var w = this.game.width / this.inView.scale.x;
+        var h = this.game.height / this.inView.scale.y;
+        var tiles = [];
+        if (this.direction === Chessboard.DIRECTION.VERTICAL) {
+            for (var x = 0; x < w; x += this.tileHeight) {
+                var tempTiles = [];
+                for (var y = 0; y < h; y += this.tileWidth) {
+                    tempTiles.push([x, y]);
+                }
+                tiles.push(tempTiles);
+            }
+        }
+        else if (this.direction === Chessboard.DIRECTION.HORIZONTAL) {
+            for (var y = 0; y < h; y += this.tileHeight) {
+                var tempTiles = [];
+                for (var x = 0; x < w; x += this.tileWidth) {
+                    tempTiles.push([x, y]);
+                }
+                tiles.push(tempTiles);
+            }
+        }
+        return tiles;
+    };
+    Chessboard.prototype.fillVerticalTile = function (tileWidth, tiles) {
+        var len = tiles.length;
+        for (var i = 0; i < len; i++) {
+            var tempTiles = tiles[i];
+            if (i % 2 == 0) {
+                for (var j = 0; j < tempTiles.length; j++) {
+                    var _a = tempTiles[j], x = _a[0], y = _a[1];
+                    this.mask.drawRect(x, y - this.tileHeight / 2, this.tileHeight, tileWidth); //垂直棋盘将tile的宽高概念互换
+                }
+            }
+            else {
+                for (var k = 0; k < tempTiles.length; k++) {
+                    var _b = tempTiles[k], x = _b[0], y = _b[1];
+                    this.mask.drawRect(x, y, this.tileHeight, tileWidth);
+                }
+            }
+        }
+    };
+    Chessboard.prototype.fillHorizontalTile = function (tileWidth, tiles) {
+        var len = tiles.length;
+        for (var i = 0; i < len; i++) {
+            var tempTiles = tiles[i];
+            if (i % 2 == 0) {
+                var _a = tempTiles[tempTiles.length - 1], lastX = _a[0], lastY = _a[1];
+                console.log(lastX);
+                for (var j = 0; j < tempTiles.length; j++) {
+                    var _b = tempTiles[j], x = _b[0], y = _b[1];
+                    this.mask.drawRect(x - this.tileWidth / 2, y, tileWidth, this.tileHeight);
+                }
+                this.mask.drawRect(lastX + this.tileWidth / 2, lastY, tileWidth, this.tileHeight); //偶数行每一块往左移了this.tileWidth / 2，所以在最后补上一块
+            }
+            else {
+                for (var k = 0; k < tempTiles.length; k++) {
+                    var _c = tempTiles[k], x = _c[0], y = _c[1];
+                    this.mask.drawRect(x, y, tileWidth, this.tileHeight);
+                }
+            }
+        }
+    };
+    Chessboard.prototype.complete = function () {
+        this.mask.destroy();
+        this.inView.mask = null;
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Chessboard;
+}(base_1.default));
+Chessboard.DIRECTION = {
+    HORIZONTAL: 'HORIZONTAL',
+    VERTICAL: 'VERTICAL',
+};
+exports.default = Chessboard;
+
+},{"./base":3,"lodash":1}],7:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -17251,7 +17513,7 @@ var Clock = (function (_super) {
 }(base_1.default));
 exports.default = Clock;
 
-},{"../view":15,"./base":3}],5:[function(require,module,exports){
+},{"../view":19,"./base":3}],8:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17338,7 +17600,7 @@ Cover.DIRECTION = {
 };
 exports.default = Cover;
 
-},{"./base":3,"lodash":1}],6:[function(require,module,exports){
+},{"./base":3,"lodash":1}],9:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17424,7 +17686,7 @@ var Dissolve = (function (_super) {
 }(base_1.default));
 exports.default = Dissolve;
 
-},{"./base":3}],7:[function(require,module,exports){
+},{"./base":3}],10:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17457,7 +17719,7 @@ var Factory = (function () {
 }());
 exports.default = Factory;
 
-},{"lodash":1}],8:[function(require,module,exports){
+},{"lodash":1}],11:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17530,10 +17792,13 @@ Fade.TIPE = {
 };
 exports.default = Fade;
 
-},{"./base":3,"lodash":1}],9:[function(require,module,exports){
+},{"./base":3,"lodash":1}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
+var box_1 = require("./box");
+var bulletin_1 = require("./bulletin");
+var chessboard_1 = require("./chessboard");
 var clock_1 = require("./clock");
 var cover_1 = require("./cover");
 var dissolve_1 = require("./dissolve");
@@ -17541,10 +17806,14 @@ var fade_1 = require("./fade");
 var line_1 = require("./line");
 var push_1 = require("./push");
 var shape_1 = require("./shape");
+var shutter_1 = require("./shutter");
 var uncover_1 = require("./uncover");
 var wipe_1 = require("./wipe");
 var factory_1 = require("./factory");
 var factory = new factory_1.default();
+factory.add('box', box_1.default);
+factory.add('bulletin', bulletin_1.default);
+factory.add('chessboard', chessboard_1.default);
 factory.add('clock', clock_1.default);
 factory.add('cover', cover_1.default);
 factory.add('dissolve', dissolve_1.default);
@@ -17552,11 +17821,15 @@ factory.add('fade', fade_1.default);
 factory.add('line', line_1.default);
 factory.add('push', push_1.default);
 factory.add('shape', shape_1.default);
+factory.add('shutter', shutter_1.default);
 factory.add('uncover', uncover_1.default);
 factory.add('wipe', wipe_1.default);
 exports.default = {
     Base: base_1.default,
     factory: factory,
+    Box: box_1.default,
+    Bulletin: bulletin_1.default,
+    Chessboard: chessboard_1.default,
     Clock: clock_1.default,
     Cover: cover_1.default,
     Dissolve: dissolve_1.default,
@@ -17564,11 +17837,12 @@ exports.default = {
     Line: line_1.default,
     Push: push_1.default,
     Shape: shape_1.default,
+    Shutter: shutter_1.default,
     Uncover: uncover_1.default,
     Wipe: wipe_1.default,
 };
 
-},{"./base":3,"./clock":4,"./cover":5,"./dissolve":6,"./factory":7,"./fade":8,"./line":10,"./push":11,"./shape":12,"./uncover":13,"./wipe":14}],10:[function(require,module,exports){
+},{"./base":3,"./box":4,"./bulletin":5,"./chessboard":6,"./clock":7,"./cover":8,"./dissolve":9,"./factory":10,"./fade":11,"./line":13,"./push":14,"./shape":15,"./shutter":16,"./uncover":17,"./wipe":18}],13:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17600,15 +17874,15 @@ var Line = (function (_super) {
         var maxLength = lines.length;
         var that = this;
         var processStart = {
-            set tileIndex(tileIndex) {
-                that.fillLine(tileIndex, lines, maxLength);
+            set lineIndex(lineIndex) {
+                that.fillLine(lineIndex, lines, maxLength);
             },
-            get tileIndex() {
+            get lineIndex() {
                 return 0;
             }
         };
         var processEnd = {
-            tileIndex: maxLength,
+            lineIndex: maxLength,
         };
         var tween = this.game.add.tween(processStart);
         tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
@@ -17630,9 +17904,9 @@ var Line = (function (_super) {
         Phaser.ArrayUtils.shuffle(lines);
         return lines;
     };
-    Line.prototype.fillLine = function (tileIndex, lines, maxLength) {
-        tileIndex = Math.floor(tileIndex);
-        while (maxLength - tileIndex < lines.length) {
+    Line.prototype.fillLine = function (lineIndex, lines, maxLength) {
+        lineIndex = Math.floor(lineIndex);
+        while (maxLength - lineIndex < lines.length) {
             var x = lines.pop();
             this.mask.drawRect(x, 0, this.lineWidth, this.game.height);
         }
@@ -17649,7 +17923,7 @@ var Line = (function (_super) {
 }(base_1.default));
 exports.default = Line;
 
-},{"./base":3}],11:[function(require,module,exports){
+},{"./base":3}],14:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17760,7 +18034,7 @@ Push.DIRECTION = {
 };
 exports.default = Push;
 
-},{"./base":3,"lodash":1}],12:[function(require,module,exports){
+},{"./base":3,"lodash":1}],15:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17815,7 +18089,104 @@ Shape.SHAPE = {
 };
 exports.default = Shape;
 
-},{"./base":3,"lodash":1}],13:[function(require,module,exports){
+},{"./base":3,"lodash":1}],16:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Shutter = (function (_super) {
+    __extends(Shutter, _super);
+    function Shutter(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Shutter.DIRECTION.HORIZONTAL);
+        _this.lineWidth = 64;
+        return _this;
+    }
+    Shutter.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        this.inView.visible = false;
+        this.mask = this.game.make.graphics(0, 0);
+        this.mask.beginFill(0xFFFFFF);
+        var that = this;
+        var processStart;
+        var processEnd;
+        if (this.direction === Shutter.DIRECTION.VERTICAL) {
+            processStart = {
+                set barWidth(barWidth) {
+                    that.fillBar(barWidth);
+                },
+                get barWidth() {
+                    return 0;
+                }
+            };
+            processEnd = {
+                barWidth: this.lineWidth,
+            };
+        }
+        else if (this.direction === Shutter.DIRECTION.HORIZONTAL) {
+            processStart = {
+                set lineWidth(lineWidth) {
+                    that.fillLine(lineWidth);
+                },
+                get lineWidth() {
+                    return 0;
+                }
+            };
+            processEnd = {
+                lineWidth: this.lineWidth,
+            };
+        }
+        var tween = this.game.add.tween(processStart);
+        tween.to(processEnd, 1000, Phaser.Easing.Linear.None, true);
+        tween.onStart.addOnce(this.onStartHandle, this);
+        tween.onComplete.addOnce(this.complete, this);
+        this.tween = tween;
+    };
+    Shutter.prototype.onStartHandle = function () {
+        this.inView.mask = this.mask;
+        this.inView.visible = true;
+    };
+    Shutter.prototype.fillLine = function (lineWidth) {
+        var w = this.game.width / this.inView.scale.x;
+        for (var x = 0; x < w; x += this.lineWidth) {
+            this.mask.drawRect(x, 0, lineWidth, this.game.height);
+        }
+    };
+    Shutter.prototype.fillBar = function (barWidth) {
+        var h = this.game.height / this.inView.scale.y;
+        for (var x = 0; x < h; x += this.lineWidth) {
+            this.mask.drawRect(0, x, this.game.width, barWidth);
+        }
+    };
+    Shutter.prototype.complete = function () {
+        this.mask.destroy();
+        this.inView.mask = null;
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Shutter;
+}(base_1.default));
+Shutter.DIRECTION = {
+    HORIZONTAL: 'HORIZONTAL',
+    VERTICAL: 'VERTICAL',
+};
+exports.default = Shutter;
+
+},{"./base":3,"lodash":1}],17:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -17902,7 +18273,7 @@ Uncover.DIRECTION = {
 };
 exports.default = Uncover;
 
-},{"./base":3,"lodash":1}],14:[function(require,module,exports){
+},{"./base":3,"lodash":1}],18:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18009,7 +18380,7 @@ Wipe.DIRECTION = {
 };
 exports.default = Wipe;
 
-},{"./base":3,"lodash":1}],15:[function(require,module,exports){
+},{"./base":3,"lodash":1}],19:[function(require,module,exports){
 /// <reference path='./definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {

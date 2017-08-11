@@ -30,15 +30,15 @@ export default class Line extends Base {
 
         var that = this;
         var processStart = {
-            set tileIndex(tileIndex) {
-                that.fillLine(tileIndex, lines, maxLength);
+            set lineIndex(lineIndex) {
+                that.fillLine(lineIndex, lines, maxLength);
             },
-            get tileIndex() {
+            get lineIndex() {
                 return 0;
             }
         }
         var processEnd = {
-            tileIndex: maxLength,
+            lineIndex: maxLength,
         }
 
 
@@ -70,10 +70,10 @@ export default class Line extends Base {
         return lines;
     }
 
-    fillLine(tileIndex: number, lines: number[], maxLength: number) {
+    fillLine(lineIndex: number, lines: number[], maxLength: number) {
 
-        tileIndex = Math.floor(tileIndex)
-        while (maxLength - tileIndex < lines.length) {
+        lineIndex = Math.floor(lineIndex)
+        while (maxLength - lineIndex < lines.length) {
             var x = lines.pop();
             this.mask.drawRect(x, 0, this.lineWidth, this.game.height);
         }
