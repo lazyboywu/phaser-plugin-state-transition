@@ -60,6 +60,8 @@ window.onload = function () {
         '线条(line)': 'line',
         '推进(push)': 'push',
         '形状(shape)': 'shape',
+        '展开(spread)': 'spread',
+        '收缩(shrink)': 'shrink',
         '百叶窗(shutter)': 'shutter',
         '擦除(wipe)': 'wipe',
     })
@@ -198,6 +200,7 @@ function createGUI(gui, type) {
         gui.add(config, 'shape', {
             '圆形(CIRCLE)': StateTransition.Transition.Shape.SHAPE.CIRCLE,
             '菱形(DIAMOND)': StateTransition.Transition.Shape.SHAPE.DIAMOND,
+            '加号(PLUS)': StateTransition.Transition.Shape.SHAPE.PLUS,
         }).onFinishChange(function (shape) {
             changeStateByTransition({
                 type: 'shape',
@@ -250,7 +253,37 @@ function createGUI(gui, type) {
                 direction: direction,
             });
         });
-    } 
+    } else if (type === 'spread') {
+        var config = {
+            'direction': '',
+        }
+        gui.add(config, 'direction', {
+            '上下(TOP_BOTTOM)': StateTransition.Transition.Spread.DIRECTION.TOP_BOTTOM,
+            '左右(LEFT_RIGHT)': StateTransition.Transition.Spread.DIRECTION.LEFT_RIGHT,
+            '左上(LEFT_TOP)': StateTransition.Transition.Spread.DIRECTION.LEFT_TOP,
+            '左下(LEFT_BOTTOM)': StateTransition.Transition.Spread.DIRECTION.LEFT_BOTTOM,
+            '右上(RIGHT_TOP)': StateTransition.Transition.Spread.DIRECTION.RIGHT_TOP,
+            '右下(RIGHT_BOTTOM)': StateTransition.Transition.Spread.DIRECTION.RIGHT_BOTTOM,
+        }).onFinishChange(function (direction) {
+            changeStateByTransition({
+                type: 'spread',
+                direction: direction,
+            });
+        });
+    } else if (type === 'shrink') {
+        var config = {
+            'direction': '',
+        }
+        gui.add(config, 'direction', {
+            '上下(TOP_BOTTOM)': StateTransition.Transition.Shrink.DIRECTION.TOP_BOTTOM,
+            '左右(LEFT_RIGHT)': StateTransition.Transition.Shrink.DIRECTION.LEFT_RIGHT,
+        }).onFinishChange(function (direction) {
+            changeStateByTransition({
+                type: 'shrink',
+                direction: direction,
+            });
+        });
+    }
 }
 
 function changeState() {

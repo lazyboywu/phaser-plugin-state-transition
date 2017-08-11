@@ -17146,7 +17146,7 @@ var Manager = (function () {
 var StateTransition = window.StateTransition = { Manager: Manager, Transition: transition_1.default, View: view_1.default };
 exports.default = StateTransition;
 
-},{"./transition":12,"./view":19}],3:[function(require,module,exports){
+},{"./transition":12,"./view":21}],3:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -17523,7 +17523,7 @@ var Clock = (function (_super) {
 }(base_1.default));
 exports.default = Clock;
 
-},{"../view":19,"./base":3}],8:[function(require,module,exports){
+},{"../view":21,"./base":3}],8:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -17816,6 +17816,8 @@ var line_1 = require("./line");
 var push_1 = require("./push");
 var shape_1 = require("./shape");
 var shutter_1 = require("./shutter");
+var shrink_1 = require("./shrink");
+var spread_1 = require("./spread");
 var uncover_1 = require("./uncover");
 var wipe_1 = require("./wipe");
 var factory_1 = require("./factory");
@@ -17830,7 +17832,9 @@ factory.add('fade', fade_1.default);
 factory.add('line', line_1.default);
 factory.add('push', push_1.default);
 factory.add('shape', shape_1.default);
+factory.add('shrink', shrink_1.default);
 factory.add('shutter', shutter_1.default);
+factory.add('spread', spread_1.default);
 factory.add('uncover', uncover_1.default);
 factory.add('wipe', wipe_1.default);
 exports.default = {
@@ -17846,12 +17850,14 @@ exports.default = {
     Line: line_1.default,
     Push: push_1.default,
     Shape: shape_1.default,
+    Shrink: shrink_1.default,
     Shutter: shutter_1.default,
+    Spread: spread_1.default,
     Uncover: uncover_1.default,
     Wipe: wipe_1.default,
 };
 
-},{"./base":3,"./box":4,"./bulletin":5,"./chessboard":6,"./clock":7,"./cover":8,"./dissolve":9,"./factory":10,"./fade":11,"./line":13,"./push":14,"./shape":15,"./shutter":16,"./uncover":17,"./wipe":18}],13:[function(require,module,exports){
+},{"./base":3,"./box":4,"./bulletin":5,"./chessboard":6,"./clock":7,"./cover":8,"./dissolve":9,"./factory":10,"./fade":11,"./line":13,"./push":14,"./shape":15,"./shrink":16,"./shutter":17,"./spread":18,"./uncover":19,"./wipe":20}],13:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -18066,16 +18072,25 @@ var Shape = (function (_super) {
         return _this;
     }
     Shape.prototype.run = function () {
+        var w = this.game.width;
+        var h = this.game.height;
         this.game.world.add(this.outView);
         this.game.world.add(this.inView);
-        var mask = this.game.add.graphics(this.game.width / 2, this.game.height / 2);
+        var mask = this.game.add.graphics(0, 0);
         mask.beginFill(0xFFFFFF);
+        mask.anchor.setTo(0.5, 0.5);
+        mask.x = w / 2;
+        mask.y = h / 2;
         this.inView.mask = mask;
         if (this.shape == Shape.SHAPE.CIRCLE) {
-            mask.drawCircle(0, 0, Math.sqrt(this.game.width * this.game.width + this.game.height * this.game.height));
+            mask.drawCircle(0, 0, Math.sqrt(w * w + h * h));
         }
         else if (this.shape == Shape.SHAPE.DIAMOND) {
-            mask.drawPolygon({ x: -this.game.width * 2, y: 0 }, { x: 0, y: this.game.height * 2 }, { x: this.game.width * 2, y: 0 }, { x: 0, y: -this.game.height * 2 });
+            mask.drawPolygon({ x: -w * 2, y: 0 }, { x: 0, y: h * 2 }, { x: w * 2, y: 0 }, { x: 0, y: -h * 2 });
+        }
+        else if (this.shape == Shape.SHAPE.PLUS) {
+            mask.drawRect(-w / 2, -3 * h / 2, w, 3 * h);
+            mask.drawRect(-3 * w / 2, -h / 2, 3 * w, h);
         }
         var tween = this.game.add.tween(this.inView.mask.scale);
         tween.from({ x: 0, y: 0 }, 1000, Phaser.Easing.Linear.None, true);
@@ -18094,10 +18109,84 @@ var Shape = (function (_super) {
 Shape.SHAPE = {
     CIRCLE: 'CIRCLE',
     DIAMOND: 'DIAMOND',
+    PLUS: 'PLUS',
 };
 exports.default = Shape;
 
 },{"./base":3}],16:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Shrink = (function (_super) {
+    __extends(Shrink, _super);
+    function Shrink(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Shrink.DIRECTION.TOP_BOTTOM);
+        return _this;
+    }
+    Shrink.prototype.run = function () {
+        this.game.world.add(this.inView);
+        this.game.world.add(this.outView);
+        this.outView.mask = this.createMask();
+        this.tween = this.createTween();
+        this.tween.onComplete.addOnce(this.complete, this);
+        ;
+    };
+    Shrink.prototype.createMask = function () {
+        var w = this.game.width;
+        var h = this.game.height;
+        var mask = this.game.add.graphics(0, 0);
+        mask.beginFill(0xFFFFFF);
+        mask.anchor.setTo(0.5, 0.5);
+        mask.x = this.game.width / 2;
+        mask.y = this.game.height / 2;
+        mask.drawRect(-mask.x, -mask.y, this.game.width, this.game.height);
+        return mask;
+    };
+    Shrink.prototype.createTween = function () {
+        var tween;
+        if (this.direction == Shrink.DIRECTION.TOP_BOTTOM) {
+            tween = this.game.add.tween(this.outView.mask.scale);
+            tween.to({ y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Shrink.DIRECTION.LEFT_RIGHT) {
+            tween = this.game.add.tween(this.outView.mask.scale);
+            tween.to({ x: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        return tween;
+    };
+    Shrink.prototype.complete = function () {
+        this.outView.mask.destroy();
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Shrink;
+}(base_1.default));
+Shrink.DIRECTION = {
+    TOP_BOTTOM: 'TOP_BOTTOM',
+    LEFT_RIGHT: 'LEFT_RIGHT',
+    LEFT_TOP: "LEFT_TOP",
+    LEFT_BOTTOM: "LEFT_BOTTOM",
+    RIGHT_TOP: "RIGHT_TOP",
+    RIGHT_BOTTOM: "RIGHT_BOTTOM",
+};
+exports.default = Shrink;
+
+},{"./base":3,"lodash":1}],17:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18194,7 +18283,113 @@ Shutter.DIRECTION = {
 };
 exports.default = Shutter;
 
-},{"./base":3,"lodash":1}],17:[function(require,module,exports){
+},{"./base":3,"lodash":1}],18:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/// <reference path='../definitions.d.ts'/>
+var _ = require("lodash");
+var base_1 = require("./base");
+var Spread = (function (_super) {
+    __extends(Spread, _super);
+    function Spread(game, outView, inView, data) {
+        var _this = _super.call(this, game, outView, inView) || this;
+        _this.direction = _.get(data, 'direction', Spread.DIRECTION.TOP_BOTTOM);
+        return _this;
+    }
+    Spread.prototype.run = function () {
+        this.game.world.add(this.outView);
+        this.game.world.add(this.inView);
+        this.inView.mask = this.createMask();
+        this.tween = this.createTween();
+        this.tween.onComplete.addOnce(this.complete, this);
+        ;
+    };
+    Spread.prototype.createMask = function () {
+        var w = this.game.width;
+        var h = this.game.height;
+        var divideCount = 16;
+        var divideX = w / divideCount;
+        var divideY = h / divideCount;
+        var mask = this.game.add.graphics(0, 0);
+        mask.beginFill(0xFFFFFF);
+        if (this.direction == Spread.DIRECTION.TOP_BOTTOM || this.direction == Spread.DIRECTION.LEFT_RIGHT) {
+            mask.anchor.setTo(0.5, 0.5);
+            mask.x = this.game.width / 2;
+            mask.y = this.game.height / 2;
+            mask.drawRect(-mask.x, -mask.y, this.game.width, this.game.height);
+        }
+        else if (this.direction == Spread.DIRECTION.LEFT_TOP) {
+            for (var i = 0; i < divideCount; i++) {
+                mask.drawRect(2 * w - divideX * i, divideY * i, this.game.width + divideX * i, divideY);
+            }
+        }
+        else if (this.direction == Spread.DIRECTION.RIGHT_BOTTOM) {
+            for (var i = 0; i < divideCount; i++) {
+                mask.drawRect(-2 * w, divideY * i, this.game.width + divideX * (divideCount - i), divideY);
+            }
+        }
+        else if (this.direction == Spread.DIRECTION.RIGHT_TOP) {
+            for (var i = 0; i < divideCount; i++) {
+                mask.drawRect(-2 * w, divideY * i, this.game.width + divideX * i, divideY);
+            }
+        }
+        else if (this.direction == Spread.DIRECTION.LEFT_BOTTOM) {
+            for (var i = 0; i < divideCount; i++) {
+                mask.drawRect(w + divideX * i, divideY * i, 2 * this.game.width - divideX * i, divideY);
+            }
+        }
+        return mask;
+    };
+    Spread.prototype.createTween = function () {
+        var tween;
+        if (this.direction == Spread.DIRECTION.TOP_BOTTOM) {
+            tween = this.game.add.tween(this.inView.mask.scale);
+            tween.from({ y: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Spread.DIRECTION.LEFT_RIGHT) {
+            tween = this.game.add.tween(this.inView.mask.scale);
+            tween.from({ x: 0 }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Spread.DIRECTION.LEFT_TOP || this.direction == Spread.DIRECTION.LEFT_BOTTOM) {
+            tween = this.game.add.tween(this.inView.mask);
+            tween.to({ x: -2 * this.game.width }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        else if (this.direction == Spread.DIRECTION.RIGHT_BOTTOM || this.direction == Spread.DIRECTION.RIGHT_TOP) {
+            tween = this.game.add.tween(this.inView.mask);
+            tween.to({ x: 2 * this.game.width }, 1000, Phaser.Easing.Linear.None, true);
+        }
+        return tween;
+    };
+    Spread.prototype.complete = function () {
+        this.inView.mask.destroy();
+        this.game.tweens.remove(this.tween);
+        this.game.world.remove(this.outView);
+        this.game.world.remove(this.inView);
+        _super.prototype.complete.call(this);
+    };
+    return Spread;
+}(base_1.default));
+Spread.DIRECTION = {
+    TOP_BOTTOM: 'TOP_BOTTOM',
+    LEFT_RIGHT: 'LEFT_RIGHT',
+    LEFT_TOP: "LEFT_TOP",
+    LEFT_BOTTOM: "LEFT_BOTTOM",
+    RIGHT_TOP: "RIGHT_TOP",
+    RIGHT_BOTTOM: "RIGHT_BOTTOM",
+};
+exports.default = Spread;
+
+},{"./base":3,"lodash":1}],19:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -18280,7 +18475,7 @@ Uncover.DIRECTION = {
 };
 exports.default = Uncover;
 
-},{"./base":3}],18:[function(require,module,exports){
+},{"./base":3}],20:[function(require,module,exports){
 /// <reference path='../definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {
@@ -18305,10 +18500,9 @@ var Wipe = (function (_super) {
     Wipe.prototype.run = function () {
         this.game.world.add(this.outView);
         this.game.world.add(this.inView);
-        var tween = this.game.add.tween(this.outView);
         var mask = this.createMask();
         this.inView.mask = mask;
-        tween = this.game.add.tween(this.inView.mask.scale);
+        var tween = this.game.add.tween(this.inView.mask.scale);
         if (this.direction == Wipe.DIRECTION.TOP || this.direction == Wipe.DIRECTION.BOTTOM) {
             tween.from({ y: 0 }, 1000, Phaser.Easing.Linear.None, true);
         }
@@ -18386,7 +18580,7 @@ Wipe.DIRECTION = {
 };
 exports.default = Wipe;
 
-},{"./base":3}],19:[function(require,module,exports){
+},{"./base":3}],21:[function(require,module,exports){
 /// <reference path='./definitions.d.ts'/>
 "use strict";
 var __extends = (this && this.__extends) || (function () {

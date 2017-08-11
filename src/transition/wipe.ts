@@ -27,12 +27,11 @@ export default class Wipe extends Base {
         this.game.world.add(this.outView);
         this.game.world.add(this.inView);
 
-        var tween = this.game.add.tween(this.outView);
         var mask = this.createMask();
 
         this.inView.mask = mask;
 
-        tween = this.game.add.tween(this.inView.mask.scale);
+        var tween = this.game.add.tween(this.inView.mask.scale);
         if (this.direction == Wipe.DIRECTION.TOP || this.direction == Wipe.DIRECTION.BOTTOM) {
             tween.from(
                 { y: 0 },

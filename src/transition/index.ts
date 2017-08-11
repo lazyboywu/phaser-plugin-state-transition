@@ -11,6 +11,8 @@ import Line from './line';
 import Push from './push';
 import Shape from './shape';
 import Shutter from './shutter';
+import Shrink from './shrink';
+import Spread from './spread';
 import Uncover from './uncover';
 import Wipe from './wipe';
 
@@ -27,7 +29,9 @@ factory.add('fade', Fade);
 factory.add('line', Line);
 factory.add('push', Push);
 factory.add('shape', Shape);
+factory.add('shrink', Shrink);
 factory.add('shutter', Shutter);
+factory.add('spread', Spread);
 factory.add('uncover', Uncover);
 factory.add('wipe', Wipe);
 
@@ -45,7 +49,9 @@ export default {
     Line,
     Push,
     Shape,
+    Shrink,
     Shutter,
+    Spread,
     Uncover,
     Wipe,
 }
