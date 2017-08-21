@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -20,7 +19,7 @@ export default class Chessboard extends Base {
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
 
-        this.direction = _.get(data, 'direction', Chessboard.DIRECTION.HORIZONTAL);
+        this.direction = this.get(data, 'direction', Chessboard.DIRECTION.HORIZONTAL);
 
         this.tileWidth = 160;
         this.tileHeight = 80;
@@ -135,7 +134,6 @@ export default class Chessboard extends Base {
             var tempTiles = tiles[i];
             if (i % 2 == 0) {
                 var [lastX, lastY] = tempTiles[tempTiles.length - 1];
-                console.log(lastX);
                 for (var j = 0; j < tempTiles.length; j++) {
                     var [x, y] = tempTiles[j];
                     this.mask.drawRect(x - this.tileWidth / 2, y, tileWidth, this.tileHeight);

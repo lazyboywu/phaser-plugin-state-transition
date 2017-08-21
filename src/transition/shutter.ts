@@ -1,5 +1,4 @@
 /// <reference path='../definitions.d.ts'/>
-import * as _ from 'lodash';
 
 import View from '../view';
 import Base from './base';
@@ -19,7 +18,7 @@ export default class Shutter extends Base {
     constructor(game: Phaser.Game, outView: View, inView: View, data?: object) {
         super(game, outView, inView);
 
-        this.direction = _.get(data, 'direction', Shutter.DIRECTION.HORIZONTAL);
+        this.direction = this.get(data, 'direction', Shutter.DIRECTION.HORIZONTAL);
 
         this.lineWidth = 64;
     }
